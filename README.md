@@ -122,3 +122,38 @@ export default defineConfig({
 ```
 
 테스트를 돌려보면 제대로 실행되는 것을 알 수 있음
+
+### 비동기 서버 컴포넌트 테스트
+
+```tsx
+export default async function Page() {
+  const pokemon = (await fetch("https://pokeapi.co/api/v2/pokemon").then(
+    (res) => res.json()
+  )) as { results: { name: string }[] };
+  return (
+    <div>
+      <h1>Pokemon</h1>
+      <ul>
+        {pokemon.results.map((p) => (
+          <li key={p.name}>{p.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+위와 같은 비동기 서버 컴포넌트가 있다.
+
+```tsx
+import { expect, test } from "vitest";
+import { render, screen } from "@testing-library/react";
+import Page from "./page";
+
+test("RSC Pokemon Page", async () => {
+  render(await Page());
+  expect(screen.findByText("bulbasaur")).toBeDefined();
+});
+```
+
+되게 간단한 형태로 Page를 await 하고 테스트를 진행할 수 있다.
